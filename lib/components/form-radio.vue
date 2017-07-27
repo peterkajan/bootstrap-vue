@@ -8,26 +8,30 @@
          @focusin.native="handleFocus"
          @focusout.native="handleFocus"
     >
-        <label v-for="(option, idx) in formOptions"
-               :class="buttons ? btnLabelClasses(option, idx) : labelClasses"
-               :key="idx"
-               :aria-pressed="buttons ? (option.value === this.localValue ? 'true' : 'false') : null"
-        >
-            <input :id="id ? (id + '__BV_radio_' + idx) : null"
-                   :class="(custom && !buttons) ? 'custom-control-input' : null"
-                   ref="inputs"
-                   type="radio"
-                   autocomplete="off"
-                   v-model="localValue"
-                   :value="option.value"
-                   :name="name"
-                   :required="name && required"
-                   :disabled="option.disabled || disabled"
-                   @change="$emit('change', returnObject ? option : option.value)"
+		<div v-for="(option, idx) in formOptions" :key="idx">        
+            <label :class="buttons ? btnLabelClasses(option, idx) : labelClasses"
+                :key="idx"
+                :aria-pressed="buttons ? (option.value === this.localValue ? 'true' : 'false') : null"
             >
-            <span v-if="custom && !buttons" class="custom-control-indicator" aria-hidden="true"></span>
-            <span :class="(custom && !buttons) ? 'custom-control-description' : null" v-html="option.text"></span>
-        </label>
+                <input :id="id ? (id + '__BV_radio_' + idx) : null"
+                    :class="(custom && !buttons) ? 'custom-control-input' : null"
+                    ref="inputs"
+                    type="radio"
+                    autocomplete="off"
+                    v-model="localValue"
+                    :value="option.value"
+                    :name="name"
+                    :required="name && required"
+                    :disabled="option.disabled || disabled"
+                    @change="$emit('change', returnObject ? option : option.value)"
+                >
+                <span v-if="custom && !buttons" class="custom-control-indicator" aria-hidden="true"></span>
+                <span :class="(custom && !buttons) ? 'custom-control-description' : null" v-html="option.text"></span>
+                &nbsp;
+                <a v-if="option.info" @click.prevent="toggleInfo(idx)"><i class="fa fa-info-circle" aria-hidden="true"></i></a>
+            </label>
+            <div v-if="infoShown[idx]" class="text-muted">{{ option.info }}</div>
+		</div>
     </div>
 </template>
 
@@ -38,8 +42,9 @@
         mixins: [formMixin, formCustomMixin, formCheckBoxMixin, formOptionsMixin],
         data() {
             return {
-                localValue: this.value
-            };
+                localValue: this.value,
+                infoShown: []
+            }
         },
         props: {
             value: {},
@@ -103,6 +108,9 @@
                 return !this.stacked;
             }
         },
+        mounted() {
+            this.initInfo(this.options)
+        },
         methods: {
             btnLabelClasses(option, idx) {
                 return [
@@ -128,7 +136,21 @@
                         label.classList.remove('focus');
                     }
                 }
+            },
+            initInfo (options) {
+                this.infoShown = []
+                for (let i in options) {
+                    this.infoShown.push(false)
+                }
+            },
+            toggleInfo (index) {
+                this.$set(this.infoShown, index, !this.infoShown[index])
+            },
+        },
+        watch: {
+            options(newVal, oldVal) {
+                this.initInfo(newVal)
             }
-        }
+        },
     };
 </script>
