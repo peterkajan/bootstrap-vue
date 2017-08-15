@@ -7,7 +7,7 @@
         <label v-if="label || $slots['label']"
                :for="target"
                :id="labelId"
-               :class="[labelSrOnly ? 'sr-only' : 'col-form-label',labelLayout,labelAlignClass]"
+               :class="[labelSrOnly ? 'sr-only' : 'col-form-label',labelLayout,labelAlignClass,labelOffsetLayout]"
         >
             <slot name="label"><span v-html="label"></span></slot>
         </label>
@@ -82,6 +82,9 @@
                 }
                 return this.labelCols;
             },
+            labelOffsetLayout() {
+              return this.horizontal ? ('offset-'+ this.labelOffset) : null;
+            },
             labelLayout() {
                 if (this.labelSrOnly) {
                     return null;
@@ -95,7 +98,7 @@
                 return this.labelTextAlign ? `text-${this.labelTextAlign}` : null;
             },
             inputLayout() {
-                return this.horizontal ? ('col-sm-' + (12 - this.computedLabelCols)) : 'col-12';
+                return this.horizontal ? ('col-sm-' + (12 - this.computedLabelCols - this.labelOffset)) : 'col-12';
             }
         },
         methods: {
@@ -155,6 +158,17 @@
                         return true;
                     }
                     warn('b-form-fieldset: label-cols must be a value between 1 and 11');
+                    return false;
+                }
+            },
+            labelOffset: {
+                type: Number,
+                default: 0,
+                validator(value) {
+                    if (value >= 0 && value <= 10) {
+                        return true;
+                    }
+                    warn('b-form-fieldset: label-offset must be a value between 0 and 10');
                     return false;
                 }
             },
